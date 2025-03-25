@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Object Counting</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f8f9fa;
+        }
+        .container {
+            width: 90%;
+            max-width: 400px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        button {
+            background: #007BFF;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        img {
+            width: 100%;
+            margin-top: 15px;
+            border-radius: 5px;
+        }
+        #result {
+            margin-top: 15px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 2s linear infinite;
+            margin: 15px auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Object Counting</h1>
+        <input type="file" id="upload" accept="image/*">
+        <button onclick="uploadFile()">Upload & Process</button>
+        <div class="loader" id="loader"></div>
+        <img id="processedImage" style="display:none;">
+        <p id="result"></p>
+    </div>
+    <script>
+        function uploadFile() {
+            const fileInput = document.getElementById('upload');
+            if (!fileInput.files.length) {
+                alert('Select a file first.');
+                return;
+            }
+            
+            // Show loading indicator
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('result').textContent = '';
+            document.getElementById('processedImage').style.display = 'none';
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            
+            fetch('/upload', { method: 'POST', body: formData })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        document.getElementById('loader').style.display = 'none';
+        if (data.image_url) {
+            document.getElementById('processedImage').src = data.image_url;
+            document.getElementById('processedImage').style.display = 'block';
+            document.getElementById('result').textContent = `Objects Detected: ${data.object_count}`;
+        }
+    })
+    .catch(error => {
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('result').textContent = `Error: ${error.message}`;
+        console.error('Error:', error);
+    });
+
+        }
+    
+    </script>
+</body>
+</html>
